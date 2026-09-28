@@ -1,0 +1,23 @@
+content_dir : D:/Mojar Project/Neural style transfer/data_set/test2017
+style_dir : D:/Mojar Project/Neural style transfer/data_set/train_1
+vgg : D:/Mojar Project/Neural style transfer/NST_Code/vgg_normalised.pth
+experiment : final_run
+final_size : 256
+content_size : 512
+style_size : 512
+crop : True
+batch_size : 4
+lr : 0.0001
+lr_decay : 5e-05
+max_iter : 20000
+content_weight : 1.0
+style_weight : 10.0
+log_interval : 50
+save_interval : 2000
+num_workers : 4
+max_grad_norm : 5.0
+amp : False
+resume : False
+decoder_path : None
+optimizer_path : None
+start_iter : 0

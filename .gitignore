@@ -1,0 +1,29 @@
+# ── Python
+__pycache__/
+**/__pycache__/
+*.pyc
+*.pyo
+venv/
+.venv/
+*.egg-info/
+
+# ── Secrets / credentials
+# Never commit these - Kaggle API key and any local environment overrides
+# for SECRET_KEY, VGG_PATH, DECODER_PATH, etc.
+kaggle.json
+.env
+
+# ── Datasets (large, and not yours to redistribute)
+data_set/
+*.zip
+
+# ── Jupyter
+.ipynb_checkpoints/
+
+# ── Editor / OS
+.vscode/
+.idea/
+.DS_Store
+**/.DS_Store
+Thumbs.db
+Desktop.ini
