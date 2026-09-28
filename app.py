@@ -61,7 +61,7 @@ MAX_UPLOAD_BYTES = 15 * 1024 * 1024
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = SECRET_KEY
-app.config['UPLOAD_FOLDER'] = 'static/uploads'
+app.config['UPLOAD_FOLDER'] = os.path.join(BASE_DIR, 'static', 'uploads')
 app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg'}
 app.config['MAX_CONTENT_LENGTH'] = MAX_UPLOAD_BYTES
 Bootstrap(app)
@@ -250,7 +250,8 @@ def send_image(filename):
 
 @app.route('/examples/<path:filename>')
 def send_example(filename):
-    return send_from_directory('examples', filename)
+    examples_dir = os.path.join(BASE_DIR, 'examples')
+    return send_from_directory(examples_dir, filename)
 
 
 if __name__ == '__main__':
