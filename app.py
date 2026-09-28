@@ -3,7 +3,7 @@ import time
 import uuid
 
 import torch
-from flask import Flask, render_template, request, redirect, url_for, send_from_directory
+from flask import Flask, render_template, request, redirect, url_for, send_from_directory, send_file
 from flask_wtf import FlaskForm
 from flask_bootstrap import Bootstrap  # provided by the Bootstrap-Flask package
 from werkzeug.utils import secure_filename
@@ -251,7 +251,18 @@ def send_image(filename):
 @app.route('/examples/<path:filename>')
 def send_example(filename):
     examples_dir = os.path.join(BASE_DIR, 'examples')
-    return send_from_directory(examples_dir, filename)
+    file_path = os.path.join(examples_dir, filename)
+
+    print(f"[examples] Requested: {filename}")
+    print(f"[examples] Path: {file_path}")
+    print(f"[examples] Exists: {os.path.isfile(file_path)}")
+    if os.path.isfile(file_path):
+        print(f"[examples] Size: {os.path.getsize(file_path)} bytes")
+
+    if not os.path.isfile(file_path):
+        return "Example image not found", 404
+
+    return send_file(file_path)
 
 
 if __name__ == '__main__':
