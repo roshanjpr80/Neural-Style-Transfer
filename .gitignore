@@ -27,3 +27,5 @@ data_set/
 **/.DS_Store
 Thumbs.db
 Desktop.ini
+
+static/
