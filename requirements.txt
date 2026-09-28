@@ -10,8 +10,6 @@ Werkzeug==3.1.4
 WTForms==3.2.1
 gunicorn==26.2.0
 
-uvicorn
-
 # ── Core ML 
 # IMPORTANT (learned the hard way while building this project): a plain
 # `pip install torch` on PyPI resolves to a CUDA-enabled build that will
