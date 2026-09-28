@@ -32,7 +32,7 @@ VGG_PATH = os.environ.get('VGG_PATH', 'vgg_normalised.pth')
 # 5,000-20,000 iterations). This is fine for confirming the pipeline works,
 # but swap in a later checkpoint (e.g. decoder_iter_20000.pth) once a full
 # training run has been done, before using output from this app in your report.
-DECODER_PATH = os.environ.get('DECODER_PATH', 'D:/Mojar Project/Neural style transfer/NST_Code/experiment/final_run/decoder_final.pth')
+DECODER_PATH = os.environ.get('DECODER_PATH', 'D:/Mojar Project/Neural style transfer/experiment/final_run/decoder_final.pth')
 
 # Longest side any uploaded image is resized to before inference. Keeps a
 # single oversized upload from making a request extremely slow or
