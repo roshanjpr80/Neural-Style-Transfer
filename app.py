@@ -19,26 +19,45 @@ from utils.utils import adaptive_instance_normalization
 
 
 # Configuration
+SECRET_KEY = os.environ.get(
+    'SECRET_KEY',
+    'dev-only-insecure-key-change-me'
+)
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+VGG_PATH = os.environ.get(
+    'VGG_PATH',
+    os.path.join(BASE_DIR, 'vgg_normalised.pth')
+)
+
+DECODER_PATH = os.environ.get(
+    'DECODER_PATH',
+    os.path.join(
+        BASE_DIR,
+        'experiment',
+        'final_run',
+        'decoder_final.pth'
+    )
+)
+
+MAX_IMAGE_DIM = 1024
+MAX_UPLOAD_BYTES = 15 * 1024 * 1024
 
 # Never commit a real secret key to source control. Set SECRET_KEY as an
 # environment variable in any real deployment; this fallback is only for
 # quick local development and is not safe to share or deploy with.
-SECRET_KEY = os.environ.get('SECRET_KEY', 'dev-only-insecure-key-change-me')
 
-VGG_PATH = os.environ.get('VGG_PATH', 'vgg_normalised.pth')
 # NOTE: decoder_final.pth (as of the version checked into this project) was
 # saved at iteration 80 of training - far too early for good stylization
 # quality (see train.py notes: meaningful quality typically starts around
 # 5,000-20,000 iterations). This is fine for confirming the pipeline works,
 # but swap in a later checkpoint (e.g. decoder_iter_20000.pth) once a full
 # training run has been done, before using output from this app in your report.
-DECODER_PATH = os.environ.get('DECODER_PATH', 'D:/Mojar Project/Neural style transfer/experiment/final_run/decoder_final.pth')
 
 # Longest side any uploaded image is resized to before inference. Keeps a
 # single oversized upload from making a request extremely slow or
 # memory-heavy, especially on CPU.
-MAX_IMAGE_DIM = 1024
-MAX_UPLOAD_BYTES = 15 * 1024 * 1024  # 15 MB
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = SECRET_KEY
