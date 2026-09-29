@@ -1,41 +1,18 @@
-# ── Web app (Flask reference implementation)
+# Deployment-only dependencies (what app.py actually imports at runtime).
+# The full requirements.txt also includes Jupyter, Kaggle, pandas and
+# matplotlib for training/notebook work - installing those on a small
+# Render instance just slows the build and wastes memory.
+#
+# Install CPU-only PyTorch FIRST (see the build command), then this file.
+
 Flask==3.1.3
-# Bootstrap-Flask replaces the abandoned Flask_Bootstrap package (unmaintained
-# since ~2018, stuck on Bootstrap 3). Same import name (flask_bootstrap), so
-# existing `from flask_bootstrap import Bootstrap` code needs little to no
-# change - just swap the installed package.
 Bootstrap-Flask==2.6.0
 flask_wtf==1.2.2
 Werkzeug==3.1.4
 WTForms==3.2.1
-gunicorn==26.2.0
+gunicorn>=23.0
 
-# ── Core ML 
-# IMPORTANT (learned the hard way while building this project): a plain
-# `pip install torch` on PyPI resolves to a CUDA-enabled build that will
-# fail to even `import torch` on a machine without a matching NVIDIA/CUDA
-# setup, because it silently expects a long list of nvidia-*-cuXX packages
-# to already be installed alongside it.
-#
-#   - If you have an NVIDIA GPU + CUDA installed: `pip install -r requirements.txt`
-#     as-is is fine.
-#   - If you're on CPU only (no NVIDIA GPU - the common case for a laptop):
-#     install torch/torchvision from PyTorch's own CPU index FIRST, then
-#     install the rest of this file:
-#       pip install torch==2.14.0 torchvision==0.29.0 --index-url https://download.pytorch.org/whl/cpu
-#       pip install -r requirements.txt
 torch==2.14.0
 torchvision==0.29.0
 numpy>=2.0,<3.0
 Pillow==12.0.0
-
-# ── Training / evaluation pipeline (models.py, utils.py, train.py, notebook) ─
-tqdm==4.66.4
-matplotlib>=3.8
-pandas>=2.2
-jupyter>=1.0
-ipykernel>=6.29
-
-# ── Dataset tooling (Kaggle Painter by Numbers, COCO)
-kaggle>=1.6
-remotezip>=0.12
