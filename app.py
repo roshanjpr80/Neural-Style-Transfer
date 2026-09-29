@@ -32,12 +32,13 @@ VGG_PATH = os.environ.get('VGG_PATH', 'vgg_normalised.pth')
 # 5,000-20,000 iterations). This is fine for confirming the pipeline works,
 # but swap in a later checkpoint (e.g. decoder_iter_20000.pth) once a full
 # training run has been done, before using output from this app in your report.
-DECODER_PATH = os.environ.get('DECODER_PATH', 'D:/Mojar Project/Neural style transfer/experiment/final_run/decoder_final.pth')
+DECODER_PATH = os.environ.get('DECODER_PATH', 'experiment/final_run/decoder_final.pth')
 
 # Longest side any uploaded image is resized to before inference. Keeps a
 # single oversized upload from making a request extremely slow or
-# memory-heavy, especially on CPU.
-MAX_IMAGE_DIM = 1024
+# memory-heavy, especially on a constrained CPU-only host (e.g. Render's
+# free tier). Lower this further (e.g. 384) if requests are still timing out.
+MAX_IMAGE_DIM = int(os.environ.get('MAX_IMAGE_DIM', 512))
 MAX_UPLOAD_BYTES = 15 * 1024 * 1024  # 15 MB
 
 app = Flask(__name__)
@@ -116,11 +117,11 @@ def style_transfer(content_image, style_image, encoder, decoder, alpha, device):
     style_image = resize_to_max_dim(style_image, MAX_IMAGE_DIM)
 
     content_transform = transforms.Compose([
-        transforms.Resize(512),
+        transforms.Resize(MAX_IMAGE_DIM),
         transforms.ToTensor()
     ])
     style_transform = transforms.Compose([
-        transforms.Resize(512),
+        transforms.Resize(MAX_IMAGE_DIM),
         transforms.ToTensor()
     ])
 
@@ -192,6 +193,10 @@ def index():
 
                 alpha = min(1.0, max(0.0, float(form.alpha.data)))
 
+                app.logger.info(
+                    f"Starting style transfer: {content_filename} + {style_filename}, "
+                    f"alpha={alpha}, max_dim={MAX_IMAGE_DIM}"
+                )
                 start_time = time.time()
                 stylized_image = style_transfer(content_img, style_img, encoder, decoder, alpha, device)
                 elapsed = time.time() - start_time
