@@ -38,7 +38,7 @@ DECODER_PATH = os.environ.get('DECODER_PATH', 'experiment/final_run/decoder_fina
 # single oversized upload from making a request extremely slow or
 # memory-heavy, especially on a constrained CPU-only host (e.g. Render's
 # free tier). Lower this further (e.g. 384) if requests are still timing out.
-MAX_IMAGE_DIM = int(os.environ.get('MAX_IMAGE_DIM', 512))
+MAX_IMAGE_DIM = int(os.environ.get('MAX_IMAGE_DIM', 256))
 MAX_UPLOAD_BYTES = 15 * 1024 * 1024  # 15 MB
 
 app = Flask(__name__)
