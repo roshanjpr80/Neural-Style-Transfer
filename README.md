@@ -12,7 +12,6 @@ Turn any photo into any artistic style — a famous painting or one of your own 
 
 - [What this project actually solves](#what-this-project-actually-solves)
 - [Two implementations, one theory](#two-implementations-one-theory)
-- [Project structure](#project-structure)
 - [Quick start](#quick-start)
 - [Getting the datasets](#getting-the-datasets)
 - [Training your own decoder](#training-your-own-decoder)
@@ -51,33 +50,13 @@ A single self-contained HTML file. Loads a pretrained AdaIN model via TensorFlow
 
 A from-scratch PyTorch implementation of the same AdaIN architecture (`models.py`), trained on real data (`train.py`) using COCO (content) and a curated Painter by Numbers subset (style), served through a Flask web app (`app.py`, `templates/index.html`). This is the version deployed live on Render, and it's the one that demonstrates understanding of the method at the implementation level — not just using someone else's pretrained weights.
 
-## Project structure
-
-```
-.
-├── app.py                    # Flask server: upload, inference, serve result
-├── models.py                 # VGGEncoder, Decoder, AdaIN, StyleTransferModel
-├── utils.py                  # Dataset loading, transforms, InfiniteSampler
-├── train.py                  # Training loop for the decoder
-├── templates/
-│   └── index.html            # Flask front-end (upload form, result viewer)
-├── examples/                 # Sample content/style/output images shown on the page
-├── neural-style-transfer.html # Standalone client-side app (Restyle) - no backend needed
-├── code.ipynb                # Feature-visualization / evaluation notebook
-├── requirements.txt          # Full dev environment (training + notebook + web app)
-├── requirements-deploy.txt   # Slim dependency set for the deployed web app only
-├── render-build.sh           # Downloads model weights during deployment
-├── .gitignore
-└── vgg_normalised.pth        # Pretrained VGG-19 encoder (not committed - see below)
-```
-
 `vgg_normalised.pth`, any `decoder_*.pth` / `optimizer_*.pth` checkpoint, and the `data_set/` folder are intentionally **not** committed to this repo (see `.gitignore`) — they're either too large for git, not legally redistributable (the style dataset includes still-copyrighted artists), or both.
 
 ## Quick start
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/YOUR_REPO.git
-cd YOUR_REPO
+git clone https://github.com/roshanjpr80/Neural-Style-Transfer.git
+cd Neural-Style-Transfer
 
 py -3.11 -m venv venv
 venv\Scripts\activate        # Windows
@@ -124,7 +103,7 @@ python train.py \
   --content_dir "path/to/coco_images" \
   --style_dir "path/to/style_images" \
   --vgg "vgg_normalised.pth" \
-  --experiment run1 \
+  --experiment final_run \
   --max_iter 20000 \
   --batch_size 4 \
   --lr 1e-4 \
@@ -143,7 +122,7 @@ python train.py \
 
 ```bash
 set VGG_PATH=vgg_normalised.pth
-set DECODER_PATH=experiment\run1\decoder_iter_20000.pth
+set DECODER_PATH=experiment\final_run\decoder_final.pth
 set SECRET_KEY=<generate one - see below>
 python app.py
 ```

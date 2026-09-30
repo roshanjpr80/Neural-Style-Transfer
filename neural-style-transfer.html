@@ -1,0 +1,1457 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Restyle — turn any photo into any style, on your device</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600&family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --ink: #1c1a17;
+        --ink-2: #26221d;
+        --canvas: #f3ede1;
+        --canvas-dim: #c9c0ac;
+        --paint: #c1442e;
+        --paint-dim: #8c331f;
+        --moss: #4f7a68;
+        --moss-dim: #3a5c50;
+        --line: rgba(243, 237, 225, 0.14);
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        background: var(--ink);
+        color: var(--canvas);
+        font-family:
+          "Inter",
+          system-ui,
+          -apple-system,
+          Segoe UI,
+          sans-serif;
+        line-height: 1.5;
+      }
+      .wrap {
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 56px 24px 96px;
+      }
+      h1,
+      h2,
+      h3 {
+        font-family: "Fraunces", Georgia, serif;
+        font-weight: 600;
+        margin: 0;
+      }
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+        color: var(--moss);
+        border: 1px solid var(--moss-dim);
+        padding: 6px 12px;
+        border-radius: 20px;
+        margin-bottom: 20px;
+      }
+      .eyebrow .dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--moss);
+      }
+      h1 {
+        font-size: 44px;
+        letter-spacing: -0.01em;
+        max-width: 760px;
+      }
+      .sub {
+        font-size: 18px;
+        color: var(--canvas-dim);
+        max-width: 600px;
+        margin-top: 18px;
+      }
+      section {
+        margin-top: 64px;
+      }
+      .step-label {
+        display: flex;
+        align-items: baseline;
+        gap: 10px;
+        margin-bottom: 18px;
+      }
+      .step-num {
+        font-family: "Fraunces", Georgia, serif;
+        font-size: 15px;
+        color: var(--paint);
+      }
+      .step-label h2 {
+        font-size: 20px;
+      }
+      .panel {
+        background: var(--ink-2);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 24px;
+      }
+      .cols {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+      }
+      @media (max-width: 720px) {
+        .cols {
+          grid-template-columns: 1fr;
+        }
+      }
+      .drop {
+        border: 1.5px dashed var(--canvas-dim);
+        border-radius: 12px;
+        padding: 28px 16px;
+        text-align: center;
+        cursor: pointer;
+        transition: border-color 0.15s ease;
+        min-height: 180px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+      }
+      .drop:hover {
+        border-color: var(--paint);
+      }
+      .drop.has-image {
+        padding: 0;
+        border-style: solid;
+        overflow: hidden;
+      }
+      .drop img {
+        width: 100%;
+        height: 220px;
+        object-fit: cover;
+        display: block;
+      }
+      .drop p {
+        margin: 0;
+        color: var(--canvas-dim);
+        font-size: 14px;
+      }
+      .drop input {
+        display: none;
+      }
+      .drop-icon {
+        font-size: 26px;
+        color: var(--canvas-dim);
+      }
+      .style-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        margin-bottom: 14px;
+      }
+      @media (max-width: 720px) {
+        .style-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+      .style-tile {
+        position: relative;
+        border-radius: 10px;
+        overflow: hidden;
+        cursor: pointer;
+        border: 2px solid transparent;
+        aspect-ratio: 1/1;
+        background: var(--ink);
+      }
+      .style-tile img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+        opacity: 0.85;
+        transition: opacity 0.15s ease;
+      }
+      .style-tile:hover img {
+        opacity: 1;
+      }
+      .style-tile.selected {
+        border-color: var(--paint);
+      }
+      .style-tile span {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        font-size: 11px;
+        padding: 6px 8px;
+        background: linear-gradient(transparent, rgba(0, 0, 0, 0.65));
+        color: var(--canvas);
+      }
+      .upload-style {
+        border: 1.5px dashed var(--canvas-dim);
+        border-radius: 10px;
+        padding: 14px;
+        text-align: center;
+        cursor: pointer;
+        font-size: 13px;
+        color: var(--canvas-dim);
+      }
+      .upload-style.has-image {
+        border-style: solid;
+        padding: 0;
+        overflow: hidden;
+        position: relative;
+      }
+      .upload-style img {
+        width: 100%;
+        height: 70px;
+        object-fit: cover;
+        display: block;
+      }
+      .upload-style input {
+        display: none;
+      }
+      .secondary-row {
+        display: flex;
+        gap: 10px;
+        margin-top: 12px;
+      }
+      button.secondary {
+        flex: 1;
+        background: transparent;
+        color: var(--canvas-dim);
+        border: 1px solid var(--line);
+        border-radius: 9px;
+        padding: 10px 14px;
+        font-family: inherit;
+        font-size: 13px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition:
+          border-color 0.15s ease,
+          color 0.15s ease;
+      }
+      button.secondary:hover {
+        border-color: var(--moss);
+        color: var(--canvas);
+      }
+      .camera-view {
+        display: none;
+        margin-top: 14px;
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid var(--line);
+      }
+      .camera-view.active {
+        display: block;
+      }
+      .camera-view video {
+        width: 100%;
+        display: block;
+        background: #000;
+      }
+      .camera-controls {
+        display: flex;
+        gap: 10px;
+        padding: 12px;
+        background: var(--ink-2);
+      }
+      .strength-row {
+        margin-bottom: 20px;
+      }
+      .strength-row label {
+        display: flex;
+        justify-content: space-between;
+        font-size: 13px;
+        color: var(--canvas-dim);
+        margin-bottom: 8px;
+      }
+      .strength-row input[type="range"] {
+        width: 100%;
+        accent-color: var(--paint);
+      }
+      .timing-note {
+        font-size: 12px;
+        color: var(--moss);
+        margin-top: 10px;
+      }
+      .blend-panel {
+        display: none;
+        margin-top: 16px;
+        padding-top: 16px;
+        border-top: 1px solid var(--line);
+      }
+      .blend-panel.active {
+        display: block;
+      }
+      .blend-panel .style-grid {
+        grid-template-columns: repeat(5, 1fr);
+      }
+      @media (max-width: 720px) {
+        .blend-panel .style-grid {
+          grid-template-columns: repeat(3, 1fr);
+        }
+      }
+      .power-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 11px;
+        color: var(--paint);
+        border: 1px solid var(--paint-dim);
+        border-radius: 12px;
+        padding: 3px 9px;
+        margin-left: 8px;
+        vertical-align: middle;
+      }
+      button.primary {
+        background: var(--paint);
+        color: #fdf6ef;
+        border: none;
+        font-family: "Fraunces", Georgia, serif;
+        font-size: 17px;
+        font-weight: 600;
+        padding: 14px 28px;
+        border-radius: 10px;
+        cursor: pointer;
+        width: 100%;
+        margin-top: 28px;
+        transition: background 0.15s ease;
+      }
+      button.primary:hover {
+        background: var(--paint-dim);
+      }
+      button.primary:disabled {
+        background: #4a453d;
+        color: var(--canvas-dim);
+        cursor: not-allowed;
+      }
+      .status {
+        margin-top: 16px;
+        font-size: 14px;
+        color: var(--moss);
+        display: none;
+        align-items: center;
+        gap: 10px;
+      }
+      .status.active {
+        display: flex;
+      }
+      .spinner {
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        border: 2px solid var(--moss-dim);
+        border-top-color: var(--moss);
+        animation: spin 0.8s linear infinite;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      .error {
+        margin-top: 16px;
+        font-size: 14px;
+        color: #e8a4a4;
+        background: rgba(193, 68, 46, 0.12);
+        border: 1px solid var(--paint-dim);
+        border-radius: 8px;
+        padding: 10px 14px;
+        display: none;
+      }
+      .error.active {
+        display: block;
+      }
+      .result-wrap {
+        display: none;
+      }
+      .result-wrap.active {
+        display: block;
+      }
+      .compare {
+        position: relative;
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        max-width: 100%;
+      }
+      .compare img,
+      .compare canvas {
+        display: block;
+        width: 100%;
+        height: auto;
+      }
+      .compare .after {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        overflow: hidden;
+      }
+      .compare .after img,
+      .compare .after canvas {
+        width: var(--w);
+        max-width: none;
+      }
+      .slider-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-top: 14px;
+      }
+      .slider-row input[type="range"] {
+        flex: 1;
+        accent-color: var(--paint);
+      }
+      .slider-row span {
+        font-size: 12px;
+        color: var(--canvas-dim);
+        min-width: 34px;
+      }
+      .actions {
+        display: flex;
+        gap: 12px;
+        margin-top: 18px;
+      }
+      .actions a,
+      .actions button {
+        flex: 1;
+        text-align: center;
+        padding: 11px 16px;
+        border-radius: 9px;
+        font-size: 14px;
+        font-family: inherit;
+        cursor: pointer;
+        text-decoration: none;
+      }
+      .actions .download {
+        background: var(--moss);
+        color: #0e1613;
+        border: none;
+        font-weight: 600;
+      }
+      .actions .reset {
+        background: transparent;
+        color: var(--canvas-dim);
+        border: 1px solid var(--line);
+      }
+      footer {
+        margin-top: 80px;
+        border-top: 1px solid var(--line);
+        padding-top: 28px;
+      }
+      footer p {
+        font-size: 13px;
+        color: var(--canvas-dim);
+        max-width: 640px;
+      }
+      .privacy-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+        color: var(--canvas-dim);
+        margin-top: 6px;
+      }
+      a:focus-visible,
+      button:focus-visible,
+      input:focus-visible,
+      [tabindex]:focus-visible {
+        outline: 2px solid var(--paint);
+        outline-offset: 2px;
+      }
+      .style-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 14px;
+        gap: 12px;
+      }
+      .style-header h2 {
+        margin: 0;
+      }
+      button.dice {
+        background: transparent;
+        border: 1px solid var(--line);
+        color: var(--canvas-dim);
+        border-radius: 20px;
+        padding: 7px 14px;
+        font-family: inherit;
+        font-size: 12px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        white-space: nowrap;
+        transition:
+          border-color 0.15s ease,
+          color 0.15s ease;
+      }
+      button.dice:hover {
+        border-color: var(--paint);
+        color: var(--canvas);
+      }
+      .progress-steps {
+        display: flex;
+        gap: 0;
+        margin-top: 16px;
+        display: none;
+      }
+      .progress-steps.active {
+        display: flex;
+      }
+      .progress-step {
+        flex: 1;
+        text-align: center;
+        position: relative;
+      }
+      .progress-step:not(:last-child)::after {
+        content: "";
+        position: absolute;
+        top: 11px;
+        left: 60%;
+        width: 80%;
+        height: 1px;
+        background: var(--line);
+      }
+      .progress-step .dot {
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        margin: 0 auto 6px;
+        background: var(--ink);
+        border: 1.5px solid var(--canvas-dim);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        color: var(--canvas-dim);
+        position: relative;
+        z-index: 1;
+        transition: all 0.2s ease;
+      }
+      .progress-step.active .dot {
+        border-color: var(--paint);
+        color: var(--paint);
+        animation: pulse 1.2s infinite;
+      }
+      .progress-step.done .dot {
+        background: var(--moss);
+        border-color: var(--moss);
+        color: #0e1613;
+      }
+      .progress-step span.label {
+        font-size: 11px;
+        color: var(--canvas-dim);
+      }
+      .progress-step.active span.label {
+        color: var(--canvas);
+      }
+      @keyframes pulse {
+        0%,
+        100% {
+          box-shadow: 0 0 0 0 rgba(193, 68, 46, 0.4);
+        }
+        50% {
+          box-shadow: 0 0 0 5px rgba(193, 68, 46, 0);
+        }
+      }
+      .history-strip {
+        display: none;
+        margin-top: 22px;
+        padding-top: 18px;
+        border-top: 1px solid var(--line);
+      }
+      .history-strip.active {
+        display: block;
+      }
+      .history-strip .hist-label {
+        font-size: 12px;
+        color: var(--canvas-dim);
+        margin-bottom: 10px;
+      }
+      .history-track {
+        display: flex;
+        gap: 10px;
+        overflow-x: auto;
+        padding-bottom: 4px;
+      }
+      .hist-item {
+        flex: 0 0 auto;
+        width: 64px;
+        height: 64px;
+        border-radius: 8px;
+        overflow: hidden;
+        border: 2px solid transparent;
+        cursor: pointer;
+        background: var(--ink);
+      }
+      .hist-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+        opacity: 0.8;
+      }
+      .hist-item:hover img,
+      .hist-item.current img {
+        opacity: 1;
+      }
+      .hist-item.current {
+        border-color: var(--paint);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="eyebrow">
+        <span class="dot"></span>Runs fully in your browser — your photo is
+        never uploaded
+      </div>
+      <h1>Turn any photo into any style</h1>
+      <p class="sub">
+        A free neural style transfer tool. Pick a photo, pick a style — a famous
+        painting or one of your own — and an AI model repaints your photo in
+        that style, entirely on your device.
+      </p>
+
+      <section>
+        <div class="step-label">
+          <span class="step-num">01</span>
+          <h2>Your photo</h2>
+        </div>
+        <div class="panel">
+          <label class="drop" id="contentDrop">
+            <div class="drop-icon">＋</div>
+            <p>Click to choose a photo, or drag one here</p>
+            <input type="file" id="contentInput" accept="image/*" />
+          </label>
+          <div class="secondary-row">
+            <button class="secondary" id="cameraBtn" type="button">
+              Use your camera instead
+            </button>
+          </div>
+          <div class="camera-view" id="cameraView">
+            <video id="cameraVideo" autoplay playsinline muted></video>
+            <div class="camera-controls">
+              <button
+                class="secondary"
+                id="captureBtn"
+                type="button"
+                style="flex: 2"
+              >
+                Capture photo
+              </button>
+              <button class="secondary" id="cancelCameraBtn" type="button">
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div class="style-header">
+          <div class="step-label" style="margin-bottom: 0">
+            <span class="step-num">02</span>
+            <h2>Choose a style</h2>
+          </div>
+          <button
+            class="dice"
+            id="surpriseBtn"
+            type="button"
+            aria-label="Pick a random style"
+          >
+            🎲 Surprise me
+          </button>
+        </div>
+        <div class="panel">
+          <div class="style-grid" id="styleGrid">
+            <div
+              class="style-tile"
+              data-style="https://commons.wikimedia.org/wiki/Special:FilePath/Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg?width=500"
+            >
+              <img
+                crossorigin="anonymous"
+                src="https://commons.wikimedia.org/wiki/Special:FilePath/Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg?width=500"
+                alt="The Starry Night by Van Gogh"
+              />
+              <span>The Starry Night — Van Gogh</span>
+            </div>
+            <div
+              class="style-tile"
+              data-style="https://commons.wikimedia.org/wiki/Special:FilePath/The_Great_Wave_off_Kanagawa.jpg?width=500"
+            >
+              <img
+                crossorigin="anonymous"
+                src="https://commons.wikimedia.org/wiki/Special:FilePath/The_Great_Wave_off_Kanagawa.jpg?width=500"
+                alt="The Great Wave off Kanagawa by Hokusai"
+              />
+              <span>The Great Wave — Hokusai</span>
+            </div>
+            <div
+              class="style-tile"
+              data-style="https://commons.wikimedia.org/wiki/Special:FilePath/Wassily_Kandinsky_Composition_VII.jpg?width=500"
+            >
+              <img
+                crossorigin="anonymous"
+                src="https://commons.wikimedia.org/wiki/Special:FilePath/Wassily_Kandinsky_Composition_VII.jpg?width=500"
+                alt="Composition VII by Kandinsky"
+              />
+              <span>Composition VII — Kandinsky</span>
+            </div>
+            <div
+              class="style-tile"
+              data-style="https://commons.wikimedia.org/wiki/Special:FilePath/The_Scream.jpg?width=500"
+            >
+              <img
+                crossorigin="anonymous"
+                src="https://commons.wikimedia.org/wiki/Special:FilePath/The_Scream.jpg?width=500"
+                alt="The Scream by Edvard Munch"
+              />
+              <span>The Scream — Munch</span>
+            </div>
+            <div
+              class="style-tile"
+              data-style="https://commons.wikimedia.org/wiki/Special:FilePath/Mona_Lisa.jpg?width=500"
+            >
+              <img
+                crossorigin="anonymous"
+                src="https://commons.wikimedia.org/wiki/Special:FilePath/Mona_Lisa.jpg?width=500"
+                alt="Mona Lisa by Leonardo da Vinci"
+              />
+              <span>Mona Lisa — da Vinci</span>
+            </div>
+          </div>
+          <label class="upload-style" id="styleUploadLabel">
+            Or upload your own style image (any painting, pattern or texture)
+            <input type="file" id="styleInput" accept="image/*" />
+          </label>
+
+          <div class="secondary-row">
+            <button class="secondary" id="blendToggleBtn" type="button">
+              + Blend a second style <span class="power-badge">AI-blended</span>
+            </button>
+          </div>
+          <div class="blend-panel" id="blendPanel">
+            <div class="style-grid" id="blendStyleGrid">
+              <div
+                class="style-tile"
+                data-style="https://commons.wikimedia.org/wiki/Special:FilePath/Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg?width=500"
+              >
+                <img
+                  crossorigin="anonymous"
+                  src="https://commons.wikimedia.org/wiki/Special:FilePath/Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg?width=500"
+                  alt="The Starry Night by Van Gogh"
+                />
+                <span>Starry Night</span>
+              </div>
+              <div
+                class="style-tile"
+                data-style="https://commons.wikimedia.org/wiki/Special:FilePath/The_Great_Wave_off_Kanagawa.jpg?width=500"
+              >
+                <img
+                  crossorigin="anonymous"
+                  src="https://commons.wikimedia.org/wiki/Special:FilePath/The_Great_Wave_off_Kanagawa.jpg?width=500"
+                  alt="The Great Wave off Kanagawa by Hokusai"
+                />
+                <span>Great Wave</span>
+              </div>
+              <div
+                class="style-tile"
+                data-style="https://commons.wikimedia.org/wiki/Special:FilePath/Wassily_Kandinsky_Composition_VII.jpg?width=500"
+              >
+                <img
+                  crossorigin="anonymous"
+                  src="https://commons.wikimedia.org/wiki/Special:FilePath/Wassily_Kandinsky_Composition_VII.jpg?width=500"
+                  alt="Composition VII by Kandinsky"
+                />
+                <span>Composition VII</span>
+              </div>
+              <div
+                class="style-tile"
+                data-style="https://commons.wikimedia.org/wiki/Special:FilePath/The_Scream.jpg?width=500"
+              >
+                <img
+                  crossorigin="anonymous"
+                  src="https://commons.wikimedia.org/wiki/Special:FilePath/The_Scream.jpg?width=500"
+                  alt="The Scream by Edvard Munch"
+                />
+                <span>The Scream</span>
+              </div>
+              <div
+                class="style-tile"
+                data-style="https://commons.wikimedia.org/wiki/Special:FilePath/Mona_Lisa.jpg?width=500"
+              >
+                <img
+                  crossorigin="anonymous"
+                  src="https://commons.wikimedia.org/wiki/Special:FilePath/Mona_Lisa.jpg?width=500"
+                  alt="Mona Lisa by Leonardo da Vinci"
+                />
+                <span>Mona Lisa</span>
+              </div>
+            </div>
+            <div class="strength-row">
+              <label
+                ><span>Blend mix</span
+                ><span id="blendValue">Style 1 only</span></label
+              >
+              <input
+                type="range"
+                id="blendSlider"
+                min="0"
+                max="100"
+                value="0"
+              />
+            </div>
+            <button class="secondary" id="removeBlendBtn" type="button">
+              Remove second style
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div class="step-label">
+          <span class="step-num">03</span>
+          <h2>Generate</h2>
+        </div>
+        <div class="panel">
+          <div class="strength-row">
+            <label
+              ><span>Style strength</span
+              ><span id="strengthValue">100%</span></label
+            >
+            <input
+              type="range"
+              id="strengthSlider"
+              min="0"
+              max="100"
+              value="100"
+            />
+          </div>
+          <button class="primary" id="generateBtn" disabled>
+            Choose a photo and a style first
+          </button>
+          <div class="progress-steps" id="progressSteps">
+            <div class="progress-step" id="progStep1">
+              <div class="dot">1</div>
+              <span class="label">Loading model</span>
+            </div>
+            <div class="progress-step" id="progStep2">
+              <div class="dot">2</div>
+              <span class="label">Reading style</span>
+            </div>
+            <div class="progress-step" id="progStep3">
+              <div class="dot">3</div>
+              <span class="label">Painting</span>
+            </div>
+          </div>
+          <div class="error" id="errorRow"></div>
+
+          <div class="result-wrap" id="resultWrap">
+            <div class="compare" id="compare">
+              <img id="beforeImg" alt="Original photo" />
+              <div class="after" id="afterWrap">
+                <canvas id="resultCanvas"></canvas>
+              </div>
+            </div>
+            <div class="slider-row">
+              <span>Before</span>
+              <input
+                type="range"
+                id="compareSlider"
+                min="0"
+                max="100"
+                value="50"
+              />
+              <span>After</span>
+            </div>
+            <div class="actions">
+              <a class="download" id="downloadBtn" download="restyled-photo.png"
+                >Download result</a
+              >
+              <button class="reset" id="resetBtn">Start over</button>
+            </div>
+            <div
+              class="timing-note"
+              id="timingNote"
+              style="display: none"
+            ></div>
+            <div class="history-strip" id="historyStrip">
+              <div class="hist-label">
+                This session's results — click to revisit
+              </div>
+              <div class="history-track" id="historyTrack"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <footer>
+        <p>
+          This runs an arbitrary style transfer network (a style-prediction
+          network paired with a transformer network, based on research from
+          Gatys et al. and the Magenta team's real-time architecture) using
+          TensorFlow.js, downloaded once and executed locally in your browser.
+          Nothing about your photo is sent anywhere.
+        </p>
+        <div class="privacy-badge">
+          No sign-up · No watermark · No server upload
+        </div>
+      </footer>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.20.0/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@magenta/image@0.2.2/dist/magentaimage.min.js"></script>
+    <script>
+      (function () {
+        var contentImgEl = null;
+        var styleImgEl = null;
+        var styleImgElB = null;
+        var stylizedImageData = null;
+        var model = null;
+        var cameraStream = null;
+
+        var contentDrop = document.getElementById("contentDrop");
+        var contentInput = document.getElementById("contentInput");
+        var cameraBtn = document.getElementById("cameraBtn");
+        var cameraView = document.getElementById("cameraView");
+        var cameraVideo = document.getElementById("cameraVideo");
+        var captureBtn = document.getElementById("captureBtn");
+        var cancelCameraBtn = document.getElementById("cancelCameraBtn");
+        var strengthSlider = document.getElementById("strengthSlider");
+        var strengthValue = document.getElementById("strengthValue");
+        var styleGrid = document.getElementById("styleGrid");
+        var styleUploadLabel = document.getElementById("styleUploadLabel");
+        var styleInput = document.getElementById("styleInput");
+        var generateBtn = document.getElementById("generateBtn");
+        var progressSteps = document.getElementById("progressSteps");
+        var progStep1 = document.getElementById("progStep1");
+        var progStep2 = document.getElementById("progStep2");
+        var progStep3 = document.getElementById("progStep3");
+        var surpriseBtn = document.getElementById("surpriseBtn");
+        var historyStrip = document.getElementById("historyStrip");
+        var historyTrack = document.getElementById("historyTrack");
+        var errorRow = document.getElementById("errorRow");
+        var resultWrap = document.getElementById("resultWrap");
+        var beforeImg = document.getElementById("beforeImg");
+        var afterWrap = document.getElementById("afterWrap");
+        var resultCanvas = document.getElementById("resultCanvas");
+        var compare = document.getElementById("compare");
+        var compareSlider = document.getElementById("compareSlider");
+        var downloadBtn = document.getElementById("downloadBtn");
+        var resetBtn = document.getElementById("resetBtn");
+        var timingNote = document.getElementById("timingNote");
+        var blendToggleBtn = document.getElementById("blendToggleBtn");
+        var blendPanel = document.getElementById("blendPanel");
+        var blendStyleGrid = document.getElementById("blendStyleGrid");
+        var blendSlider = document.getElementById("blendSlider");
+        var blendValue = document.getElementById("blendValue");
+        var removeBlendBtn = document.getElementById("removeBlendBtn");
+
+        function showError(msg) {
+          errorRow.textContent = msg;
+          errorRow.classList.add("active");
+        }
+        function clearError() {
+          errorRow.classList.remove("active");
+          errorRow.textContent = "";
+        }
+        var progStepEls = [progStep1, progStep2, progStep3];
+        function setProgressStep(stepIndex) {
+          // stepIndex: 0 = hide entirely, 1/2/3 = which step is active now (previous steps marked done)
+          if (!stepIndex) {
+            progressSteps.classList.remove("active");
+            progStepEls.forEach(function (el) {
+              el.classList.remove("active", "done");
+            });
+            return;
+          }
+          progressSteps.classList.add("active");
+          progStepEls.forEach(function (el, i) {
+            var n = i + 1;
+            el.classList.toggle("done", n < stepIndex);
+            el.classList.toggle("active", n === stepIndex);
+          });
+        }
+        function updateGenerateState() {
+          if (contentImgEl && styleImgEl) {
+            generateBtn.disabled = false;
+            generateBtn.textContent = "Generate artwork";
+          } else {
+            generateBtn.disabled = true;
+            generateBtn.textContent = "Choose a photo and a style first";
+          }
+        }
+
+        function loadImageFromFile(file, callback) {
+          var reader = new FileReader();
+          reader.onload = function (e) {
+            var img = new Image();
+            img.onload = function () {
+              callback(img);
+            };
+            img.onerror = function () {
+              showError("That file could not be read as an image.");
+            };
+            img.src = e.target.result;
+          };
+          reader.readAsDataURL(file);
+        }
+
+        function acceptContentImage(img) {
+          contentImgEl = img;
+          contentDrop.classList.add("has-image");
+          contentDrop.innerHTML = "";
+          var previewImg = document.createElement("img");
+          previewImg.src = img.src;
+          contentDrop.appendChild(previewImg);
+          contentDrop.appendChild(contentInput);
+          updateGenerateState();
+        }
+
+        contentDrop.addEventListener("click", function (e) {
+          if (e.target !== contentInput) contentInput.click();
+        });
+        contentInput.addEventListener("change", function () {
+          var file = contentInput.files[0];
+          if (!file) return;
+          loadImageFromFile(file, acceptContentImage);
+        });
+
+        function stopCamera() {
+          if (cameraStream) {
+            cameraStream.getTracks().forEach(function (track) {
+              track.stop();
+            });
+            cameraStream = null;
+          }
+          cameraView.classList.remove("active");
+        }
+
+        cameraBtn.addEventListener("click", function () {
+          clearError();
+          if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            showError(
+              "Your browser does not support camera capture. Please upload a photo instead.",
+            );
+            return;
+          }
+          navigator.mediaDevices
+            .getUserMedia({ video: { facingMode: "user" }, audio: false })
+            .then(function (stream) {
+              cameraStream = stream;
+              cameraVideo.srcObject = stream;
+              cameraView.classList.add("active");
+            })
+            .catch(function () {
+              showError(
+                "Could not access your camera. Check your browser permissions and try again.",
+              );
+            });
+        });
+
+        cancelCameraBtn.addEventListener("click", stopCamera);
+
+        captureBtn.addEventListener("click", function () {
+          var canvas = document.createElement("canvas");
+          canvas.width = cameraVideo.videoWidth;
+          canvas.height = cameraVideo.videoHeight;
+          canvas.getContext("2d").drawImage(cameraVideo, 0, 0);
+          var img = new Image();
+          img.onload = function () {
+            acceptContentImage(img);
+          };
+          img.src = canvas.toDataURL("image/png");
+          stopCamera();
+        });
+
+        strengthSlider.addEventListener("input", function () {
+          strengthValue.textContent = strengthSlider.value + "%";
+        });
+
+        blendToggleBtn.addEventListener("click", function () {
+          blendPanel.classList.add("active");
+          blendToggleBtn.style.display = "none";
+        });
+
+        removeBlendBtn.addEventListener("click", function () {
+          styleImgElB = null;
+          blendPanel.classList.remove("active");
+          blendToggleBtn.style.display = "";
+          Array.prototype.forEach.call(
+            blendStyleGrid.querySelectorAll(".style-tile"),
+            function (t) {
+              t.classList.remove("selected");
+            },
+          );
+          blendSlider.value = 0;
+          blendValue.textContent = "Style 1 only";
+        });
+
+        Array.prototype.forEach.call(
+          blendStyleGrid.querySelectorAll(".style-tile"),
+          function (tile) {
+            tile.addEventListener("click", function () {
+              Array.prototype.forEach.call(
+                blendStyleGrid.querySelectorAll(".style-tile"),
+                function (t) {
+                  t.classList.remove("selected");
+                },
+              );
+              tile.classList.add("selected");
+              var url = tile.getAttribute("data-style");
+              var img = new Image();
+              img.crossOrigin = "anonymous";
+              img.onload = function () {
+                styleImgElB = img;
+                if (parseInt(blendSlider.value, 10) === 0) {
+                  blendSlider.value = 50;
+                  blendValue.textContent = "50 / 50";
+                }
+              };
+              img.onerror = function () {
+                showError("Could not load that second style image.");
+              };
+              img.src = url;
+            });
+          },
+        );
+
+        blendSlider.addEventListener("input", function () {
+          var v = parseInt(blendSlider.value, 10);
+          if (v === 0) {
+            blendValue.textContent = "Style 1 only";
+          } else if (v === 100) {
+            blendValue.textContent = "Style 2 only";
+          } else {
+            blendValue.textContent = 100 - v + " / " + v;
+          }
+        });
+
+        function selectPresetStyle(tile) {
+          Array.prototype.forEach.call(
+            styleGrid.querySelectorAll(".style-tile"),
+            function (t) {
+              t.classList.remove("selected");
+            },
+          );
+          tile.classList.add("selected");
+          styleUploadLabel.classList.remove("has-image");
+          styleUploadLabel.innerHTML =
+            "Or upload your own style image (any painting, pattern or texture)";
+          styleUploadLabel.appendChild(styleInput);
+          var url = tile.getAttribute("data-style");
+          var img = new Image();
+          img.crossOrigin = "anonymous";
+          img.onload = function () {
+            styleImgEl = img;
+            updateGenerateState();
+          };
+          img.onerror = function () {
+            showError(
+              "Could not load that style image. Try another, or upload your own.",
+            );
+          };
+          img.src = url;
+        }
+
+        Array.prototype.forEach.call(
+          styleGrid.querySelectorAll(".style-tile"),
+          function (tile) {
+            tile.addEventListener("click", function () {
+              selectPresetStyle(tile);
+            });
+          },
+        );
+
+        styleUploadLabel.addEventListener("click", function (e) {
+          if (e.target !== styleInput) styleInput.click();
+        });
+        styleInput.addEventListener("change", function () {
+          var file = styleInput.files[0];
+          if (!file) return;
+          loadImageFromFile(file, function (img) {
+            styleImgEl = img;
+            Array.prototype.forEach.call(
+              styleGrid.querySelectorAll(".style-tile"),
+              function (t) {
+                t.classList.remove("selected");
+              },
+            );
+            styleUploadLabel.classList.add("has-image");
+            styleUploadLabel.innerHTML = "";
+            var previewImg = document.createElement("img");
+            previewImg.src = img.src;
+            styleUploadLabel.appendChild(previewImg);
+            styleUploadLabel.appendChild(styleInput);
+            updateGenerateState();
+          });
+        });
+
+        function resizeToCanvas(img, maxDim) {
+          var w = img.naturalWidth || img.width;
+          var h = img.naturalHeight || img.height;
+          var scale = Math.min(1, maxDim / Math.max(w, h));
+          var canvas = document.createElement("canvas");
+          canvas.width = Math.round(w * scale);
+          canvas.height = Math.round(h * scale);
+          var ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          return canvas;
+        }
+
+        var history = []; // {beforeUrl, afterUrl} for this browser session only, never persisted
+
+        function addToHistory(beforeUrl, afterUrl) {
+          history.unshift({ before: beforeUrl, after: afterUrl });
+          if (history.length > 8) history.pop();
+          renderHistory();
+        }
+
+        function renderHistory() {
+          if (history.length === 0) {
+            historyStrip.classList.remove("active");
+            return;
+          }
+          historyStrip.classList.add("active");
+          historyTrack.innerHTML = "";
+          history.forEach(function (entry, i) {
+            var item = document.createElement("div");
+            item.className = "hist-item" + (i === 0 ? " current" : "");
+            item.tabIndex = 0;
+            item.setAttribute("role", "button");
+            item.setAttribute("aria-label", "View result " + (i + 1));
+            var img = document.createElement("img");
+            img.src = entry.after;
+            item.appendChild(img);
+            item.addEventListener("click", function () {
+              beforeImg.src = entry.before;
+              var img2 = new Image();
+              img2.onload = function () {
+                resultCanvas.width = img2.naturalWidth;
+                resultCanvas.height = img2.naturalHeight;
+                resultCanvas.getContext("2d").drawImage(img2, 0, 0);
+                downloadBtn.href = entry.after;
+                compare.style.setProperty("--w", compare.clientWidth + "px");
+                afterWrap.style.width = compareSlider.value + "%";
+              };
+              img2.src = entry.after;
+              Array.prototype.forEach.call(
+                historyTrack.children,
+                function (el) {
+                  el.classList.remove("current");
+                },
+              );
+              item.classList.add("current");
+            });
+            historyTrack.appendChild(item);
+          });
+        }
+
+        generateBtn.addEventListener("click", function () {
+          if (!contentImgEl || !styleImgEl) return;
+          clearError();
+          generateBtn.disabled = true;
+          resultWrap.classList.remove("active");
+          setProgressStep(1);
+          var startTime = performance.now();
+
+          var contentCanvas = resizeToCanvas(contentImgEl, 512);
+          var styleCanvas = resizeToCanvas(styleImgEl, 256);
+
+          var initPromise;
+          if (model) {
+            initPromise = Promise.resolve();
+          } else {
+            model = new mi.ArbitraryStyleTransferNetwork();
+            initPromise = model.initialize();
+          }
+
+          initPromise
+            .then(function () {
+              setProgressStep(2);
+              if (styleImgElB && model.predictStyleParameters) {
+                var styleCanvasB = resizeToCanvas(styleImgElB, 256);
+                return Promise.all([
+                  model.predictStyleParameters(styleCanvas),
+                  model.predictStyleParameters(styleCanvasB),
+                ])
+                  .then(function (reps) {
+                    var ratio = parseInt(blendSlider.value, 10) / 100;
+                    var blended = tf.tidy(function () {
+                      return reps[0]
+                        .mul(tf.scalar(1 - ratio))
+                        .add(reps[1].mul(tf.scalar(ratio)));
+                    });
+                    reps[0].dispose();
+                    reps[1].dispose();
+                    setProgressStep(3);
+                    return model
+                      .stylize(contentCanvas, blended)
+                      .then(function (result) {
+                        blended.dispose();
+                        return result;
+                      });
+                  })
+                  .catch(function (blendErr) {
+                    console.warn(
+                      "Style blend unavailable, falling back to single style.",
+                      blendErr,
+                    );
+                    setProgressStep(3);
+                    return model.stylize(contentCanvas, styleCanvas);
+                  });
+              }
+              setProgressStep(3);
+              return model.stylize(contentCanvas, styleCanvas);
+            })
+            .then(function (imageData) {
+              stylizedImageData = imageData;
+              resultCanvas.width = imageData.width;
+              resultCanvas.height = imageData.height;
+              var ctx = resultCanvas.getContext("2d");
+              ctx.putImageData(imageData, 0, 0);
+
+              var strength = parseInt(strengthSlider.value, 10) / 100;
+              if (strength < 1) {
+                var blended = document.createElement("canvas");
+                blended.width = imageData.width;
+                blended.height = imageData.height;
+                var bctx = blended.getContext("2d");
+                bctx.drawImage(
+                  contentCanvas,
+                  0,
+                  0,
+                  blended.width,
+                  blended.height,
+                );
+                bctx.globalAlpha = strength;
+                bctx.drawImage(resultCanvas, 0, 0);
+                bctx.globalAlpha = 1;
+                ctx.clearRect(0, 0, resultCanvas.width, resultCanvas.height);
+                ctx.drawImage(blended, 0, 0);
+              }
+
+              beforeImg.src = contentCanvas.toDataURL();
+              compare.style.setProperty("--w", compare.clientWidth + "px");
+              afterWrap.style.width = "50%";
+              compareSlider.value = 50;
+
+              downloadBtn.href = resultCanvas.toDataURL("image/png");
+
+              var seconds = ((performance.now() - startTime) / 1000).toFixed(1);
+              setProgressStep(0);
+              resultWrap.classList.add("active");
+              generateBtn.disabled = false;
+              generateBtn.textContent = "Generate again";
+              timingNote.textContent =
+                "Generated in " +
+                seconds +
+                "s — entirely on your device, nothing uploaded.";
+              timingNote.style.display = "block";
+              addToHistory(
+                contentCanvas.toDataURL(),
+                resultCanvas.toDataURL("image/png"),
+              );
+            })
+            .catch(function (err) {
+              console.error(err);
+              setProgressStep(0);
+              generateBtn.disabled = false;
+              generateBtn.textContent = "Generate artwork";
+              showError(
+                "Something went wrong loading or running the AI model. Check your connection and try again.",
+              );
+            });
+        });
+
+        surpriseBtn.addEventListener("click", function () {
+          var tiles = styleGrid.querySelectorAll(".style-tile");
+          if (tiles.length === 0) return;
+          var pick = tiles[Math.floor(Math.random() * tiles.length)];
+          selectPresetStyle(pick);
+          pick.scrollIntoView({ behavior: "smooth", block: "center" });
+        });
+
+        compareSlider.addEventListener("input", function () {
+          afterWrap.style.width = compareSlider.value + "%";
+        });
+
+        window.addEventListener("resize", function () {
+          if (resultWrap.classList.contains("active")) {
+            compare.style.setProperty("--w", compare.clientWidth + "px");
+          }
+        });
+
+        resetBtn.addEventListener("click", function () {
+          contentImgEl = null;
+          styleImgEl = null;
+          styleImgElB = null;
+          stylizedImageData = null;
+          stopCamera();
+          blendPanel.classList.remove("active");
+          blendToggleBtn.style.display = "";
+          Array.prototype.forEach.call(
+            blendStyleGrid.querySelectorAll(".style-tile"),
+            function (t) {
+              t.classList.remove("selected");
+            },
+          );
+          blendSlider.value = 0;
+          blendValue.textContent = "Style 1 only";
+          contentDrop.classList.remove("has-image");
+          contentDrop.innerHTML =
+            '<div class="drop-icon">＋</div><p>Click to choose a photo, or drag one here</p>';
+          contentDrop.appendChild(contentInput);
+          contentInput.value = "";
+          Array.prototype.forEach.call(
+            styleGrid.querySelectorAll(".style-tile"),
+            function (t) {
+              t.classList.remove("selected");
+            },
+          );
+          styleUploadLabel.classList.remove("has-image");
+          styleUploadLabel.innerHTML =
+            "Or upload your own style image (any painting, pattern or texture)";
+          styleUploadLabel.appendChild(styleInput);
+          styleInput.value = "";
+          clearError();
+          setProgressStep(0);
+          resultWrap.classList.remove("active");
+          timingNote.style.display = "none";
+          updateGenerateState();
+        });
+
+        ["dragover", "drop"].forEach(function (evt) {
+          contentDrop.addEventListener(evt, function (e) {
+            e.preventDefault();
+          });
+        });
+        contentDrop.addEventListener("drop", function (e) {
+          var file = e.dataTransfer.files[0];
+          if (file) {
+            contentInput.files = e.dataTransfer.files;
+            loadImageFromFile(file, acceptContentImage);
+          }
+        });
+      })();
+    </script>
+  </body>
+</html>
